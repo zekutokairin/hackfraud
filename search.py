@@ -15,25 +15,37 @@ ytp_url = "https://www.youtube.com/playlist?list=PL9XZF4i8A3ISHK7joPITYCATkIXjYF
 def searchJustwatch(title):
     # Search JustWatch for multi-streaming services
     results = jwsearch(title, COUNTRY, "en", 5, True)
+    ret = []
+    n = 0
     for movie in results:
-        print("%s (%d)" % (movie.title, movie.release_year))
-        print("============================")
+        #print("============================")
+        has_offer = False
         for offer in movie.offers:
             if offer.monetization_type in MONETIZATION_TYPES:
-                print("%s:%s" % (offer.name, offer.url))
-        print("============================")
-    raise Exception("Got multiple movies for title, please verify correct match!")
+                #print("%s:%s" % (offer.name, offer.url))
+                has_offer = True
+        if has_offer:
+            ret.append(movie)
+        #print("============================")
+    return ret
 
 def searchArchiveCollection(title):
     # Search Archive.org RSS links
     feed = feedparser.parse(archive_rss)
     movies = feed.get('entries')
     for movie in movies:
+        print(movie.get('title'))
         if title in movie.get('title'):
             print(movie.get('title') + "\t\t" + movie.get('links')[0]['href'])
 
 def findMovie(title):
-    searchJustwatch(title)
+    jw = searchJustwatch(title)
+    n = 1
+    for movie in jw:
+        print("%d: %s (%d)" % (n, movie.title, movie.release_year))
+    print("0: None of these")
+    # TODO: Prompt user if we specified update
+
     searchArchiveCollection(title)
         
     # TODO: How can we programmatically use the archive.org subject search?
