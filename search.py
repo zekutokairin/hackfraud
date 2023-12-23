@@ -41,12 +41,20 @@ def searchArchiveCollection(title):
 def findMovie(title):
     jw = searchJustwatch(title)
     n = 1
+    movies = []
     for movie in jw:
         print("%d: %s (%d)" % (n, movie.title, movie.release_year))
+        n+=1
     print("0: None of these")
-    # TODO: Prompt user if we specified update
+    # TODO: Prompt user to select movie
+    selection = int(input())
+    selection-=1
+    for offer in jw[selection].offers:
+        if offer.monetization_type in MONETIZATION_TYPES:
+            print("%s:%s" % (offer.name, offer.url))
 
-    searchArchiveCollection(title)
+
+    #searchArchiveCollection(title)
         
     # TODO: How can we programmatically use the archive.org subject search?
     # TODO Search Youtube instructional URL playlists

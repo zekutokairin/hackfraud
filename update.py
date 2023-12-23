@@ -6,11 +6,23 @@ import search
 
 botw_main = os.path.join("csv","BoTW_Main.csv")
 botw_spotlight = os.path.join("csv", "BoTW_Spotlight.csv")
+sheets = [botw_main, botw_spotlight]
 
-def readCsvs():
+def parseSpotlightCsv():
+    with open(botw_spotlight, newline='') as maincsv:
+        fieldnames = ['Title', 'Type','URL1','URL2','URL3']
+        with open("output_spotlight.csv", 'w', newline='') as outputcsv:
+            reader = csv.DictReader(maincsv)
+            writer = csv.DictWriter(outputcsv,fieldnames)
+            writer.writeheader()
+            for row in reader:
+                writer.writerow({'Title': row['Film'], 'Type':'Spotlight'})
+
+
+def parseMainCsv():
     with open(botw_main, newline='') as maincsv:
         fieldnames = ['Title', 'Type','URL1','URL2','URL3']
-        with open("output.csv", 'w', newline='') as outputcsv:
+        with open("output_main.csv", 'w', newline='') as outputcsv:
             reader = csv.DictReader(maincsv)
             writer = csv.DictWriter(outputcsv,fieldnames)
             writer.writeheader()
@@ -44,5 +56,6 @@ def writeCsv():
 if __name__ == "__main__":
     # Warning! You only ever need to do readCsvs when you want to
     #   overwrite the entire list! You will lose all the URLs!
-    #readCsvs()
-    listMissing()
+    parseMainCsv()
+    parseSpotlightCsv()
+    #listMissing()
