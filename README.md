@@ -9,3 +9,5 @@ Given the fanmade RedLetterMedia BOTW spreadsheet as CSV:
     * Archive.org
     * Youtube channels
 
+
+TODO: Add --rebuild option to restart master list from scratch
