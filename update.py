@@ -54,16 +54,40 @@ def parseMainCsv(writecsv=False):
                     writer.writerow({'Title': row['Non-Reviewed / Extra Videos'], 'Type':row['Gimmick'],'URL1':None,'URL2':None,'URL3':None})
     return ret
 
-def listMissing():
+def listMissing(movie_dict):
     # Parse through our current BOTW Link catalog and find movies with
     #   no streaming links.
-    with open("output.csv", newline='') as outputcsv:
-        reader = csv.DictReader(outputcsv)
-        for row in reader:
-            if not row['URL1'] and not row['URL2'] and not row['URL3']:
-                print("Missing Video Links for: %s" % row['Title'])
+    nourl_titles = []
 
-def writeCsv():
+    for title, url_list in movie_dict.items():
+        url1, url2, url3 = url_list
+        if not url1 and not url2 and not url3:
+            print("Missing Video Links for: %s" % title)
+            nourl_titles.append(title)
+
+    return nourl_titles
+            
+
+def update():
+    # 1) Parse through the Movie DB and find movies with no links
+    # 2) Search API for movie offerings
+    # 3) Prompt user for match and populate offerings in DB
+    master_dict = {}
+    with open("movies.csv", 'r', newline='') as mastercsv:
+        reader = csv.DictReader(mastercsv)
+        for row in reader:
+            key = row['Title']
+            master_dict[key] = [row['URL1'],row['URL2'],row['URL3']]
+
+    missing = listMissing(master_dict)
+
+    for title in missing:
+        search.findMovie(title)
+    # Get back a list of URLs
+    # TODO: Update the master_dict with those URLs
+    # TODO: Write master_dict to new CSV
+
+def writeToCsv():
     # CSV Format should be:
     # Title, Type, URL1, URL2, URL3
     pass
@@ -83,27 +107,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # TODO: implement rebuild which abandon existing URL database
-    """
-    print("Are you SURE you want to do this? It will remove all existing movie URLs and attempt to re-fetch all of them! [y/N]")
-    prompt = input()
-    if prompt.lower() == "y":
-        print("Rebuilding...")
-    """
-    # Parse the latest CSV files from Google Doc into movie title list 
-    main = parseMainCsv()
-    spotlight = parseSpotlightCsv()
+    # TODO: 
+    if args.rebuild:
+        print("Are you SURE you want to do this? It will remove all existing movie URLs and attempt to re-fetch all of them! [y/N]")
+        prompt = input()
+        if prompt.lower() == "y":
+            print("Rebuilding...")
 
-    all_movies = main + spotlight
+            # Parse the latest CSV files from Google Doc into movie title list 
+            main = parseMainCsv()
+            spotlight = parseSpotlightCsv()
 
-    # Search master list for movie titles that have no URLs
-    master_dict = {}
-    with open("master.csv", 'r', newline='') as mastercsv:
-        reader = csv.DictReader(mastercsv)
-        for row in reader:
-            key = row['Title']
-            master_dict[key] = [row['URL1'],row['URL2'],row['URL3']]
+            all_movies = main + spotlight
 
-        import code
-        code.interact(local=locals())
-    #listMissing()
+    elif args.update:
+        update()
