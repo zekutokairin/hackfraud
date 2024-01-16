@@ -48,8 +48,6 @@ def findMovie(title):
     
     if len(jw) > 0:
         for movie in jw:
-            import code
-            code.interact(local=locals())
             print("%d: %s (%d)" % (n, movie.title, movie.release_year))
             n+=1
         print("0: None of these")
