@@ -18,7 +18,6 @@ def parseCsv():
     m = open("movies.csv", 'r')
     reader = csv.DictReader(m)
     for row in reader:
-        #print("%s: %s" % (row['Title'], row['Type']))
         try:
             cur.execute("INSERT INTO movies VALUES (?, ?, ?)", (row['Title'], row['Type'], ""))
             con.commit()
@@ -35,22 +34,41 @@ def findMissing():
 
     for result in movies:
         title = result[0]
-        search.findMovie(title)
+        url_list = search.findMovie(title)
+        urlstring = ",".join(url_list)
+
+        # TODO: Insert URLs into database
+        cur.execute("UPDATE movies SET urls = ? WHERE title = ?", (urlstring, title))
+        con.commit()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                     prog='HackFraud',
                     description='Finds free/ad supported movie watching links for BOTW movie database',
                     epilog='')
+  
+    # TODO: add doc strings for this option
+    parser.add_argument('-r', '--rebuild',
+                    action='store_true')  # on/off flag
 
     parser.add_argument('-u', '--update',
                     action='store_true')  # on/off flag
 
+    parser.add_argument('-p', '--print',
+                    action='store_true')  # on/off flag
+
+
+
     args = parser.parse_args()
 
+    if args.update:
+        findMissing()
+
+    elif args.print:
+        dumpDb()
+        
     # Only do this once if we need to
-    setupDb()
-    parseCsv()
+    #setupDb()
+    #parseCsv()
     #dumpDb()
-    #findMissing()
     

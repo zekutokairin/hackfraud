@@ -13,9 +13,14 @@ instructional_url = "https://www.youtube.com/@instructionalvhstapeacrhiv2038/vid
 ytp_url = "https://www.youtube.com/playlist?list=PL9XZF4i8A3ISHK7joPITYCATkIXjYFmfn"
 
 def searchJustwatch(title):
-    # Search JustWatch for multi-streaming services
-    results = jwsearch(title, COUNTRY, "en", 5, True)
     ret = []
+    # Search JustWatch for multi-streaming services
+    try:
+        results = jwsearch(title, COUNTRY, "en", 5, True)
+    except Exception as e:
+        # The API wrapper may not cleanly parse all results, return empty list
+        return []
+
     n = 0
     for movie in results:
         #print("============================")
@@ -38,20 +43,31 @@ def searchArchiveCollection(title):
         if title in movie.get('title'):
             print(movie.get('title') + "\t\t" + movie.get('links')[0]['href'])
 
+def promptInt():
+    ret = None
+    while True:
+        try:
+            ret = int(input())
+            return ret
+        except ValueError:
+            print("Please enter a valid number:")
+        
+
 def findMovie(title):
+    print("*** Searching for movie: \"%s\"" % title)
     jw = searchJustwatch(title)
     n = 1
 
     urls = []
 
-    print("Movie: \"%s\"" % title)
     
     if len(jw) > 0:
         for movie in jw:
             print("%d: %s (%d)" % (n, movie.title, movie.release_year))
             n+=1
         print("0: None of these")
-        selection = int(input())
+        selection = promptInt()
+
         if selection > 0:
             selection-=1
 
@@ -61,7 +77,7 @@ def findMovie(title):
                 for offer in jw[selection].offers:
                     if offer.monetization_type == mtype:
                         urls.append(offer.url)
-                        print("%s:%s" % (offer.name, offer.url))
+                        #print("%s:%s" % (offer.name, offer.url))
 
         # We're only going to return the first 3 URLs
     else:
