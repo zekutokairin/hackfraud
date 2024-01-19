@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
+import os
 import csv
 import argparse
 import sqlite3
+import feedparser
 
 import search
 
 con = sqlite3.connect("tutorial.db")
 cur = con.cursor()
+
+archiveRss = os.path.join("rss","bestoftheworst_collection.rss")
 
 def setupDb():
     # For now, urls will be a comma separated list of urls as a string
@@ -28,10 +32,13 @@ def dumpDb():
     res = cur.execute("SELECT * from movies")
     print(res.fetchall())
 
-def findMissing():
+def listMissing():
     res = cur.execute("SELECT title FROM movies WHERE  urls=''")
     movies = res.fetchall()
+    return movies
 
+def findMissing():
+    moves = listMissing()
     for result in movies:
         title = result[0]
         url_list = search.findMovie(title)
@@ -41,28 +48,53 @@ def findMissing():
         cur.execute("UPDATE movies SET urls = ? WHERE title = ?", (urlstring, title))
         con.commit()
 
+def parseRss():
+    d = feedparser.parse(open(archiveRss).read())
+    entries = d['entries']
+    for entry in entries:
+        print("%s:%s" % (entry.title, entry.links[0]['href']))
+        
+    import code
+    #code.interact(local=locals())
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                     prog='HackFraud',
                     description='Finds free/ad supported movie watching links for BOTW movie database',
                     epilog='')
   
-    # TODO: add doc strings for this option
     parser.add_argument('-r', '--rebuild',
-                    action='store_true')  # on/off flag
+                    action='store_true',
+                    help='Delete the database and rebuild from scratch')  # on/off flag
 
-    parser.add_argument('-u', '--update',
-                    action='store_true')  # on/off flag
+    parser.add_argument('-j', '--justwatch',
+                    action='store_true',
+                    help='Update movie DB by searching JustWatch for streaming links')  # on/off flag
+
+    parser.add_argument('-a', '--archive',
+                    action='store_true',
+                    help='Update movie DB by searching Archive.org BOTW category')
 
     parser.add_argument('-p', '--print',
-                    action='store_true')  # on/off flag
+                    action='store_true',
+                    help='Print the contents of the DB')
 
-
+    parser.add_argument('-l','--listmissing',
+                    action='store_true',
+                    help='Return a list of missing movies we still need links for')
 
     args = parser.parse_args()
 
-    if args.update:
+    if args.justwatch:
         findMissing()
+
+    elif args.archive:
+        parseRss()
+
+    elif args.listmissing:
+        movies = listMissing()
+        import pprint
+        pprint.pprint(movies)
 
     elif args.print:
         dumpDb()
