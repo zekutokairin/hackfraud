@@ -29,7 +29,11 @@ def parseCsv():
             print("Refusing to insert duplicate movie title: %s" % row['Title'])
 
 def dumpDb():
+    # Take all the movies and links we have, write it to a CSV
+    # Also print to output
     res = cur.execute("SELECT * from movies")
+    import code
+    #code.interact(local=locals())
     print(res.fetchall())
 
 def listMissing():
@@ -38,7 +42,7 @@ def listMissing():
     return movies
 
 def findMissing():
-    moves = listMissing()
+    movies = listMissing()
     for result in movies:
         title = result[0]
         url_list = search.findMovie(title)
@@ -51,11 +55,23 @@ def findMissing():
 def parseRss():
     d = feedparser.parse(open(archiveRss).read())
     entries = d['entries']
+
+    movies = listMissing()
+    print("Missingmovies======")
+    for movie in movies:
+        movie = movie[0]
+        print(movie)
+
+        import code
+        #code.interact(local=locals())
+
+    print("Entries=====")
     for entry in entries:
-        print("%s:%s" % (entry.title, entry.links[0]['href']))
+        print(entry.title)
+        if movie == entry.title:
+            print(movie)
+        #print("%s:%s" % (entry.title, entry.links[0]['href']))
         
-    import code
-    #code.interact(local=locals())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -75,7 +91,7 @@ if __name__ == "__main__":
                     action='store_true',
                     help='Update movie DB by searching Archive.org BOTW category')
 
-    parser.add_argument('-p', '--print',
+    parser.add_argument('-d', '--dump',
                     action='store_true',
                     help='Print the contents of the DB')
 
@@ -93,10 +109,11 @@ if __name__ == "__main__":
 
     elif args.listmissing:
         movies = listMissing()
-        import pprint
-        pprint.pprint(movies)
+        for movie in movies:
+            # It's a list of tuples for some reason lmao
+            print(movie[0])
 
-    elif args.print:
+    elif args.dump:
         dumpDb()
         
     # Only do this once if we need to
