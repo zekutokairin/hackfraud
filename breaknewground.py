@@ -32,13 +32,41 @@ def dumpDb():
     # Take all the movies and links we have, write it to a CSV
     # Also print to output
     res = cur.execute("SELECT * from movies")
-    import code
-    #code.interact(local=locals())
-    print(res.fetchall())
+    movie_entries = res.fetchall()
+
+    with open("movies.csv", 'w', newline='') as outputcsv:
+        url1 = None
+        url2 = None
+        url3 = None
+        fieldnames = ['Title', 'Type','URL1','URL2','URL3']
+        writer = csv.DictWriter(outputcsv,fieldnames)
+        writer.writeheader()
+        for row in movie_entries: 
+            title, mtype, linkstring = row
+            print(linkstring)
+            links = linkstring.split(',')
+            if len(links) > 0:
+                url1 = links[0]
+            if len(links) > 1:
+                url2 = links[1]
+            if len(links) > 2:
+                url3 = links[2]
+
+            writer.writerow({'Title': row[0], 'Type':row[1],'URL1':url1,'URL2':url2,'URL3':url3})
 
 def listMissing():
-    res = cur.execute("SELECT title FROM movies WHERE  urls=''")
+    #res = cur.execute("SELECT title FROM movies WHERE  urls=''")
+    res = cur.execute("SELECT * from movies WHERE urls=''")
     movies = res.fetchall()
+
+    fieldnames = ['Title', 'Type','URL1','URL2','URL3']
+
+    import code
+    with open("missing.csv", 'w', newline='') as outputcsv:
+        writer = csv.DictWriter(outputcsv,fieldnames)
+
+        for row in movies:
+            writer.writerow({'Title': row[0], 'Type':row[1],'URL1':"",'URL2':"",'URL3':""})
     return movies
 
 def findMissing():

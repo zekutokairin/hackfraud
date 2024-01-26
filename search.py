@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env py#thon3
 import sys
 import feedparser
 from simplejustwatchapi.justwatch import search as jwsearch
@@ -10,6 +10,7 @@ MONETIZATION_TYPES = ["FREE","ADS"]
 archive_rss = "https://archive.org/services/collection-rss.php?collection=bestoftheworst-collection"
 # TODO: Figure out if there are any items in this search that are not also in the above collection
 archive2_url = "https://archive.org/search?query=subject%3A%22Best%20of%20the%20Worst%22"
+archive3_url = "https://archive.org/download/video_archive_553-cd-207"
 # TODO: Somehow catalogue the titles of the Youtube playlist entries
 instructional_url = "https://www.youtube.com/@instructionalvhstapeacrhiv2038/videos"
 # Not sure if we want to use these, they may or may not be legit
